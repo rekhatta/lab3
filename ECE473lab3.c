@@ -47,8 +47,14 @@ void InitConsole(void); //Instructor Provided
 void ADCInit (void);    //Instructor Provided
 
 //Student Written Functions
-uint32_t convertToFahrenheit ( uint32_t TempC);  //To be completed
+uint32_t convertToFahrenheit( float TempC);  //To be completed
 void PrintTemps (uint32_t TempC);//To be modified
+void PrintFahrenheit(uint32_t TempF);
+
+char listener(){
+	return UARTgetc();
+}	
+
 
 //Determines the sample rate of the ADC 
 uint32_t clkscalevalue = 6;
@@ -71,6 +77,7 @@ int main(void)
     // AVG, Celsius and Fahrenheit.
 		uint32_t ui32TempAvg;
     uint32_t ui32TempValueC;
+		uint32_t ui32TempValueF;
     
 
     // Set the clocking to run at 20 MHz (200 MHz / 5) using the PLL.  When
@@ -98,6 +105,7 @@ int main(void)
     // console.
     while(1)
     {
+				char key = 'b';
         // Trigger the ADC conversion.
         ADCProcessorTrigger(ADC0_BASE, 1);
 
@@ -117,10 +125,12 @@ int main(void)
 				
 				//Convert Raw Data to Temp Celsius
 				ui32TempValueC = (1475 - ((2475 * ui32TempAvg)) / 4096)/10; 
-				
+				ui32TempValueF = convertToFahrenheit((1475 - ((2475 * ui32TempAvg)) / 4096)/10);
 
         // Display the temperature value on the console.
-        PrintTemps (ui32TempValueC);
+        
+				
+				//PrintTemps (ui32TempValueC);
 
         //
         // This function provides a means of generating a constant length
@@ -128,6 +138,19 @@ int main(void)
         // 250ms arbitrarily.
         //
         SysCtlDelay(SysCtlClockGet() / clkscalevalue);
+				
+				// Switch statement for key listeing input
+				key = listener();
+				switch(key) {
+					case 'c': 
+						PrintTemps( ui32TempValueC);
+					break;
+					case 'f':
+						PrintFahrenheit(ui32TempValueF);
+					break;
+					default :
+					break;
+				}
     }
 }
 //***************************************************************************
@@ -136,13 +159,10 @@ int main(void)
 
 //This function converts the 32bit unsigned value representation of Celsius
 //Temperature from the ADC and converts it to Farenheit
-uint32_t convertToFahrenheit ( uint32_t TempC)
+uint32_t convertToFahrenheit( float TempC)
 {
 		//Fill out this function
-		uint32_t TempF=0;
-	
-
-
+		uint32_t TempF=(1.8)*TempC+32.0;
 		return TempF;
 }
 
@@ -151,10 +171,15 @@ uint32_t convertToFahrenheit ( uint32_t TempC)
 void PrintTemps (uint32_t TempC)
 {
 	
-	UARTprintf("Temperature = %3d*C\n", TempC);	
+	UARTprintf("Temperature C = %3d*C\n", TempC);	
 
 }
 
+void PrintFahrenheit (uint32_t TempF) {
+	
+	UARTprintf("Temperature F = %3d*F\n", TempF);
+
+}	
 
 //PROVIDED FUNCTIONS.  NO NEED TO MODIFY
 //*****************************************************************************
